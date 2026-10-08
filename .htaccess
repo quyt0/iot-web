@@ -1,0 +1,10 @@
+RewriteEngine On
+
+RewriteRule ^(dao|lib|vendor|migrations|frankenphp-windows-x86_64)(/|$) - [F,L]
+<FilesMatch "^(config\.php|database\.php|mqtt_worker\.php|init\.sql|composer\.(json|lock)|docker-compose\.yml|Dockerfile|_common\.php)$">
+    Require all denied
+</FilesMatch>
+
+RewriteRule ^api/devices/([^/]+)/actions/?$ api/devices/actions.php?device=$1 [QSA,L]
+RewriteCond %{DOCUMENT_ROOT}/$1.php -f
+RewriteRule ^(api/.+?)/?$ $1.php [QSA,L]

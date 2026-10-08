@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  web:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: ptit_iot_web
+    ports:
+      - "8000:80"
+    environment:
+      TZ: Asia/Ho_Chi_Minh
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      - db
+
+  mqtt_worker:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: ptit_iot_worker
+    command: sh -c "if [ ! -d 'vendor' ]; then composer install --no-interaction; fi && php mqtt_worker.php"
+    environment:
+      TZ: Asia/Ho_Chi_Minh
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  db:
+    image: mysql:8.0
+    container_name: ptit_iot_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: R00tp@ssword
+      MYSQL_DATABASE: ptit_iot
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: Adminp@ssw0rd
+      TZ: Asia/Ho_Chi_Minh
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+volumes:
+  db_data:
